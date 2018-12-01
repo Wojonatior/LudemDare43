@@ -1,24 +1,21 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Linq;
+using System.Collections.Generic;
+using System;
 
 namespace LudemDare.Desktop
 {
-    public struct GameObject {
-        public Vector2 position;
-        public Vector2 velocity;
-        public Texture2D texture;
-        public System.Func<KeyboardState,GameTime,GameObject,GameObject> update;
-    }
-    
     public class Game1 : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        static ProjectileFactory localProjectileFactory;
         private GameObject Player;
-        private System.Collections.Generic.Dictionary<string, GameObject> GameObjects
-            = new System.Collections.Generic.Dictionary<string, GameObject>();
+        private Dictionary<string, Texture2D> Textures
+            = new Dictionary<string, Texture2D>();
+        private Dictionary<string, GameObject> GameObjects
+            = new Dictionary<string, GameObject>();
 
 
         public Game1()
@@ -27,12 +24,6 @@ namespace LudemDare.Desktop
             Content.RootDirectory = "Content";
         }
 
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
@@ -44,82 +35,103 @@ namespace LudemDare.Desktop
 
             Player.velocity = new Vector2(200, 200);
             Player.update = updatePlayer;
+            Player.addItem = AddFromPlayer;
 
             GameObjects.Add("PLAYER", Player);
             base.Initialize();
         }
 
-        /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
-        /// </summary>
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            Player.texture = Content.Load<Texture2D>("btc_128");
+
+            Textures["PLAYER"] = Content.Load<Texture2D>("btc_128");
+            Textures["PROJECTILE"] = Content.Load<Texture2D>("btc_32");
+
+            localProjectileFactory = new ProjectileFactory(Textures["PROJECTILE"]);
 
             var tempPlayer = GameObjects["PLAYER"];
-            tempPlayer.texture = Content.Load<Texture2D>("btc_128");
+            tempPlayer.texture = Textures["PLAYER"];
             GameObjects["PLAYER"] = tempPlayer;
-
-
-            // TODO: use this.Content to load your game content here
         }
 
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// game-specific content.
-        /// </summary>
-        protected override void UnloadContent()
-        {
-            // TODO: Unload any non ContentManager content here
+        protected override void UnloadContent() { // TODO: Unload any non ContentManager content here
         }
 
         private static GameObject updatePlayer(KeyboardState kState, GameTime gameTime, GameObject player){
             var newPos = player.position;
             //TODO: think about how rollover is handled
-            if (kState.IsKeyDown(Keys.Up))
+            if (kState.IsKeyDown(Keys.W))
                 newPos.Y -= player.velocity.Y * (float)gameTime.ElapsedGameTime.TotalSeconds;
             
-            if(kState.IsKeyDown(Keys.Down))
+            if(kState.IsKeyDown(Keys.S))
                 newPos.Y +=  player.velocity.Y * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (kState.IsKeyDown(Keys.Left))
+            if (kState.IsKeyDown(Keys.A))
                 newPos.X -= player.velocity.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
             
-            if(kState.IsKeyDown(Keys.Right))
+            if(kState.IsKeyDown(Keys.D))
                 newPos.X +=  player.velocity.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             player.position = newPos;
             return player;
         }
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Update(GameTime gameTime)
+
+
+        private static GameObject? AddFromPlayer(KeyboardState kState, GameTime gameTime, GameObject player)
         {
+            if (kState.IsKeyDown(Keys.Up))
+                return localProjectileFactory.CreateUp(player.position);
+
+            if (kState.IsKeyDown(Keys.Down))
+                return localProjectileFactory.CreateDown(player.position);
+
+            if (kState.IsKeyDown(Keys.Left))
+                return localProjectileFactory.CreateLeft(player.position);
+
+            if (kState.IsKeyDown(Keys.Right))
+                return localProjectileFactory.CreateRight(player.position);
+
+            return null;
+        }
+
+        public static Dictionary<string, GameObject> UpdateExistingObjects (Dictionary<string, GameObject> GameObjects, KeyboardState kState, GameTime gameTime){
+            var newDict = new Dictionary<string, GameObject>();
+            foreach (var labeledObject in GameObjects)
+            {
+                newDict[labeledObject.Key] =
+                    labeledObject.Value.update(kState, gameTime, labeledObject.Value);
+            }
+            return newDict;
+        }
+
+        public static Dictionary<string, GameObject> CreateNewObjects (Dictionary<string, GameObject> GameObjects, KeyboardState kState, GameTime gameTime){
+            var newDict = new Dictionary<string, GameObject>();
+            foreach (var labeledObject in GameObjects)
+            {
+                var newObject = labeledObject.Value.addItem(kState, gameTime, labeledObject.Value);
+                if (newObject.HasValue)
+                    newDict[Guid.NewGuid().ToString()] = newObject.Value;
+            }
+            return newDict;
+        }
+
+        protected override void Update(GameTime gameTime) {
+
             var kState = Keyboard.GetState();
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || kState.IsKeyDown(Keys.Escape))
                 Exit();
 
-
-            var newDict  = new System.Collections.Generic.Dictionary<string, GameObject>();
-            foreach (var labeledObject in GameObjects) {
-                newDict[labeledObject.Key] = 
-                    labeledObject.Value.update(kState, gameTime, labeledObject.Value);
+            GameObjects = UpdateExistingObjects(GameObjects, kState, gameTime);
+            var newObjects = CreateNewObjects(GameObjects, kState, gameTime);
+            foreach (var obj in newObjects){
+                GameObjects[obj.Key] = obj.Value;
             }
-            GameObjects = newDict;
 
             base.Update(gameTime);
         }
 
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
