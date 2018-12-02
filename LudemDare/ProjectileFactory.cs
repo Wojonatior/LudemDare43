@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
 
 namespace LudemDare
 {
@@ -21,8 +20,8 @@ namespace LudemDare
                 position = position,
                 velocity = new Vector2(0, -100),
                 texture = Texture,
-                update = updateProjectile,
-                addItem = addFromProjectile
+                update = UpdateProjectile,
+                addItem = AddFromProjectile
             };
         }
 
@@ -55,14 +54,14 @@ namespace LudemDare
             return projectile;
         }
 
-        private static GameObject updateProjectile(KeyboardState kState, GameTime gameTime, GameObject projectile)
+        private static GameObject UpdateProjectile(KeyboardState kState, GameTime gameTime, GameObject projectile)
         {
             projectile.position.X += projectile.velocity.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
             projectile.position.Y += projectile.velocity.Y * (float)gameTime.ElapsedGameTime.TotalSeconds;
             return projectile;
         }
 
-        private static GameObject? addFromProjectile(KeyboardState kState, GameTime gameTime, GameObject projectile)
+        private static GameObject? AddFromProjectile(KeyboardState kState, GameTime gameTime, GameObject projectile)
         {
             return null;
         }

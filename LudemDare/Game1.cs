@@ -29,12 +29,8 @@ namespace LudemDare.Desktop
             // TODO: Add your initialization logic here
 
             //Initalizer.getStartingPlayer(seed);
-            Player.position = new Vector2(
-                graphics.PreferredBackBufferWidth / 2,
-                graphics.PreferredBackBufferHeight / 2);
 
-            Player.velocity = new Vector2(200, 200);
-            Player.update = updatePlayer;
+            Player = PlayerFactory.CreatePlayer(graphics);
             Player.addItem = AddFromPlayer;
 
             GameObjects.Add("PLAYER", Player);
@@ -57,25 +53,6 @@ namespace LudemDare.Desktop
         }
 
         protected override void UnloadContent() { // TODO: Unload any non ContentManager content here
-        }
-
-        private static GameObject updatePlayer(KeyboardState kState, GameTime gameTime, GameObject player){
-            var newPos = player.position;
-            //TODO: think about how rollover is handled
-            if (kState.IsKeyDown(Keys.W))
-                newPos.Y -= player.velocity.Y * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            
-            if(kState.IsKeyDown(Keys.S))
-                newPos.Y +=  player.velocity.Y * (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            if (kState.IsKeyDown(Keys.A))
-                newPos.X -= player.velocity.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            
-            if(kState.IsKeyDown(Keys.D))
-                newPos.X +=  player.velocity.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            player.position = newPos;
-            return player;
         }
 
 
