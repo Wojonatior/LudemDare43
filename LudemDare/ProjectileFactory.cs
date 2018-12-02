@@ -55,8 +55,13 @@ namespace LudemDare
             return projectile;
         }
 
-        private static GameObject UpdateProjectile(KeyboardState kState, GameTime gameTime, GameObject projectile)
+        private static GameObject UpdateProjectile(KeyboardState kState, GameTime gameTime, GameObject projectile, GraphicsDeviceManager graphics)
         {
+            if (projectile.position.X >= graphics.PreferredBackBufferWidth + projectile.texture.Width / 2||
+                projectile.position.X + projectile.texture.Width / 2 <= 0 ||
+                projectile.position.Y >= graphics.PreferredBackBufferHeight + projectile.texture.Height / 2||
+                projectile.position.Y + projectile.texture.Height / 2 <= 0)
+                projectile.shouldDelete = true;
             projectile.position.X += projectile.velocity.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
             projectile.position.Y += projectile.velocity.Y * (float)gameTime.ElapsedGameTime.TotalSeconds;
             return projectile;

@@ -73,12 +73,12 @@ namespace LudemDare.Desktop
             return null;
         }
 
-        public static Dictionary<string, GameObject> UpdateExistingObjects (Dictionary<string, GameObject> GameObjects, KeyboardState kState, GameTime gameTime){
+        public static Dictionary<string, GameObject> UpdateExistingObjects (Dictionary<string, GameObject> GameObjects, KeyboardState kState, GameTime gameTime, GraphicsDeviceManager graphics){
             var newDict = new Dictionary<string, GameObject>();
             foreach (var labeledObject in GameObjects)
             {
                 newDict[labeledObject.Key] =
-                    labeledObject.Value.update(kState, gameTime, labeledObject.Value);
+                    labeledObject.Value.update(kState, gameTime, labeledObject.Value, graphics);
             }
             return newDict;
         }
@@ -100,7 +100,7 @@ namespace LudemDare.Desktop
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || kState.IsKeyDown(Keys.Escape))
                 Exit();
 
-            GameObjects = UpdateExistingObjects(GameObjects, kState, gameTime);
+            GameObjects = UpdateExistingObjects(GameObjects, kState, gameTime, graphics);
             var newObjects = CreateNewObjects(GameObjects, kState, gameTime);
             var toDelete = new List<string>();
 

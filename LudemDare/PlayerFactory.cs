@@ -21,7 +21,7 @@ namespace LudemDare
             return player;
         }
 
-        private static GameObject UpdatePlayer(KeyboardState kState, GameTime gameTime, GameObject player)
+        private static GameObject UpdatePlayer(KeyboardState kState, GameTime gameTime, GameObject player, GraphicsDeviceManager graphics)
         {
             var newPos = player.position;
             //TODO: think about how rollover is handled
