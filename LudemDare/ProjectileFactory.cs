@@ -21,7 +21,8 @@ namespace LudemDare
                 velocity = new Vector2(0, -100),
                 texture = Texture,
                 update = UpdateProjectile,
-                addItem = AddFromProjectile
+                addItem = AddFromProjectile,
+                shouldDelete = false
             };
         }
 

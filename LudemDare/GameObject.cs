@@ -9,4 +9,5 @@ public struct GameObject
     public Texture2D texture;
     public System.Func<KeyboardState, GameTime, GameObject, GameObject> update;
     public System.Func<KeyboardState, GameTime, GameObject, GameObject?> addItem;
+    public bool shouldDelete;
 }

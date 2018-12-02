@@ -102,9 +102,17 @@ namespace LudemDare.Desktop
 
             GameObjects = UpdateExistingObjects(GameObjects, kState, gameTime);
             var newObjects = CreateNewObjects(GameObjects, kState, gameTime);
-            foreach (var obj in newObjects){
+            var toDelete = new List<string>();
+
+            foreach (var obj in newObjects)
                 GameObjects[obj.Key] = obj.Value;
-            }
+
+            foreach (var obj in GameObjects)
+                if (obj.Value.shouldDelete)
+                    toDelete.Add(obj.Key);
+
+            foreach (var key in toDelete)
+                GameObjects.Remove(key);
 
             base.Update(gameTime);
         }

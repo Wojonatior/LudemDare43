@@ -6,18 +6,17 @@ namespace LudemDare
 {
     public class PlayerFactory
     {
-        public PlayerFactory()
-        {
-        }
-
         public static GameObject CreatePlayer(GraphicsDeviceManager graphics){
-            var player = new GameObject();
-            player.position = new Vector2(
+            var player = new GameObject
+            {
+                position = new Vector2(
                 graphics.PreferredBackBufferWidth / 2,
-                graphics.PreferredBackBufferHeight / 2);
+                graphics.PreferredBackBufferHeight / 2),
 
-            player.velocity = new Vector2(200, 200);
-            player.update = UpdatePlayer;
+                velocity = new Vector2(200, 200),
+                update = UpdatePlayer,
+                shouldDelete = false
+            };
 
             return player;
         }
