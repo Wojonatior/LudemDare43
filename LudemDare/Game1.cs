@@ -55,21 +55,18 @@ namespace LudemDare.Desktop
         protected override void UnloadContent() { // TODO: Unload any non ContentManager content here
         }
 
-
         private static GameObject? AddFromPlayer(KeyboardState kState, GameTime gameTime, GameObject player)
         {
-            if (kState.IsKeyDown(Keys.Up))
-                return localProjectileFactory.CreateUp(player.position);
-
-            if (kState.IsKeyDown(Keys.Down))
-                return localProjectileFactory.CreateDown(player.position);
-
-            if (kState.IsKeyDown(Keys.Left))
-                return localProjectileFactory.CreateLeft(player.position);
-
-            if (kState.IsKeyDown(Keys.Right))
-                return localProjectileFactory.CreateRight(player.position);
-
+            switch (player.otherStrings["attackDirection"]) {
+                case "up":
+                    return localProjectileFactory.CreateUp(player.position);
+                case "down":
+                    return localProjectileFactory.CreateDown(player.position);
+                case "left":
+                    return localProjectileFactory.CreateLeft(player.position);
+                case "right":
+                    return localProjectileFactory.CreateRight(player.position);
+            }
             return null;
         }
 

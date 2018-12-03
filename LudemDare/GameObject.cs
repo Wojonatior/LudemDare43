@@ -10,4 +10,6 @@ public struct GameObject
     public System.Func<KeyboardState, GameTime, GameObject, GraphicsDeviceManager, GameObject> update;
     public System.Func<KeyboardState, GameTime, GameObject, GameObject?> addItem;
     public bool shouldDelete;
+    public System.Collections.Generic.Dictionary<string, double> otherNums;
+    public System.Collections.Generic.Dictionary<string, string> otherStrings;
 }
