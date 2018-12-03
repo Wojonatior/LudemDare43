@@ -15,6 +15,8 @@ namespace LudemDare
 
                 velocity = new Vector2(200, 200),
                 update = UpdatePlayer,
+                resolveCollision = resolveCollision,
+                objectType = ObjectType.Player,
                 shouldDelete = false
             };
 
@@ -87,6 +89,11 @@ namespace LudemDare
                 newPos.X += player.velocity.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             return newPos;
+        }
+
+        private static GameObject resolveCollision(GameObject player, GameObject collidedWith)
+        {
+            return player;
         }
 
         private static GameObject UpdatePlayer(KeyboardState kState, GameTime gameTime, GameObject player, GraphicsDeviceManager graphics)

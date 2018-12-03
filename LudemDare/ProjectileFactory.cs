@@ -18,10 +18,11 @@ namespace LudemDare
             return new GameObject
             {
                 position = position,
-                velocity = new Vector2(0, -100),
                 texture = Texture,
                 update = UpdateProjectile,
                 addItem = AddFromProjectile,
+                resolveCollision = resolveCollision,
+                objectType = ObjectType.PlayerProjectile,
                 shouldDelete = false
             };
         }
@@ -29,21 +30,21 @@ namespace LudemDare
         public GameObject CreateUp(Vector2 position)
         {
             GameObject projectile = genericProjectile(position);
-            projectile.velocity = new Vector2(0, -100);
+            projectile.velocity = new Vector2(0, -300);
             return projectile;
         }
 
         public GameObject CreateDown(Vector2 position)
         {
             GameObject projectile = genericProjectile(position);
-            projectile.velocity = new Vector2(0, 100);
+            projectile.velocity = new Vector2(0, 300);
             return projectile;
         }
 
         public GameObject CreateRight(Vector2 position)
         {
             GameObject projectile = genericProjectile(position);
-            projectile.velocity = new Vector2(100, 0);
+            projectile.velocity = new Vector2(300, 0);
             return projectile;
         }
 
@@ -51,7 +52,15 @@ namespace LudemDare
         public GameObject CreateLeft(Vector2 position)
         {
             GameObject projectile = genericProjectile(position);
-            projectile.velocity = new Vector2(-100, 0);
+            projectile.velocity = new Vector2(-300, 0);
+            return projectile;
+        }
+
+        private static GameObject resolveCollision(GameObject projectile, GameObject collidedWith)
+        {
+            if(collidedWith.objectType == ObjectType.Enemy){
+                projectile.shouldDelete = true;
+            }
             return projectile;
         }
 

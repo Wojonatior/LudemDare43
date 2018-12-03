@@ -105,6 +105,30 @@ namespace LudemDare.Desktop
             ));
         }
 
+        private static bool CheckCollision(GameObject obj1, GameObject obj2){
+            return obj1.position.X < obj2.position.X + obj2.texture.Width &&
+                obj1.position.X + obj1.texture.Width > obj2.position.X &&
+                obj1.position.Y < obj2.position.Y + obj2.texture.Height &&
+                obj1.position.Y + obj1.texture.Height > obj2.position.Y;
+        }
+
+        private static Dictionary<String,GameObject> CheckCollisionForAllObjects(Dictionary<String,GameObject> gameObjects){
+
+            var updatedObjects = new Dictionary<String,GameObject>(gameObjects);
+            foreach (var obj in gameObjects) {
+                foreach (var otherObj in gameObjects) {
+                    if (obj.Key == otherObj.Key)
+                        continue;
+
+                    var didCollide = CheckCollision(obj.Value, otherObj.Value);
+                    updatedObjects[obj.Key] = didCollide ?
+                        obj.Value.resolveCollision(obj.Value, otherObj.Value) :
+                        obj.Value;
+                }
+            }
+            return gameObjects.Count == 1 ? gameObjects : updatedObjects;
+        }
+
         protected override void Update(GameTime gameTime) {
 
             var kState = Keyboard.GetState();
@@ -112,6 +136,7 @@ namespace LudemDare.Desktop
                 Exit();
 
             GameObjects = UpdateExistingObjects(GameObjects, kState, gameTime, graphics);
+            GameObjects = CheckCollisionForAllObjects(GameObjects);
             var newObjects = CreateNewObjects(GameObjects, kState, gameTime);
             var toDelete = new List<string>();
 

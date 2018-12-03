@@ -22,16 +22,26 @@ namespace LudemDare
                 texture = Texture,
                 update = UpdateEnemy,
                 addItem = AddFromEnemy,
+                resolveCollision = resolveCollision,
+                objectType = ObjectType.Enemy,
                 shouldDelete = false
             };
         }
 
-        private static GameObject UpdateEnemy(KeyboardState kState, GameTime gameTime, GameObject projectile, GraphicsDeviceManager graphics)
+        private static GameObject resolveCollision(GameObject enemy, GameObject collidedWith)
         {
-            return projectile;
+            if (collidedWith.objectType == ObjectType.PlayerProjectile) {
+                enemy.shouldDelete = true;
+            }
+            return enemy;
         }
 
-        private static GameObject? AddFromEnemy(KeyboardState kState, GameTime gameTime, GameObject projectile)
+        private static GameObject UpdateEnemy(KeyboardState kState, GameTime gameTime, GameObject enemy, GraphicsDeviceManager graphics)
+        {
+            return enemy;
+        }
+
+        private static GameObject? AddFromEnemy(KeyboardState kState, GameTime gameTime, GameObject enemy)
         {
             return null;
         }
