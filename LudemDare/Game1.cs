@@ -11,11 +11,14 @@ namespace LudemDare.Desktop
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         static ProjectileFactory localProjectileFactory;
+        static EnemyFatory localEnemyFactory;
         private GameObject Player;
         private Dictionary<string, Texture2D> Textures
             = new Dictionary<string, Texture2D>();
         private Dictionary<string, GameObject> GameObjects
             = new Dictionary<string, GameObject>();
+        System.Random random;
+        bool EHeld;
 
 
         public Game1()
@@ -30,6 +33,8 @@ namespace LudemDare.Desktop
 
             //Initalizer.getStartingPlayer(seed);
 
+            EHeld = false;
+            random = new Random();
             Player = PlayerFactory.CreatePlayer(graphics);
             Player.addItem = AddFromPlayer;
 
@@ -44,8 +49,10 @@ namespace LudemDare.Desktop
 
             Textures["PLAYER"] = Content.Load<Texture2D>("btc_128");
             Textures["PROJECTILE"] = Content.Load<Texture2D>("btc_32");
+            Textures["ENEMY"] = Content.Load<Texture2D>("blue_128");
 
             localProjectileFactory = new ProjectileFactory(Textures["PROJECTILE"]);
+            localEnemyFactory = new EnemyFatory(Textures["ENEMY"]);
 
             var tempPlayer = GameObjects["PLAYER"];
             tempPlayer.texture = Textures["PLAYER"];
@@ -91,6 +98,13 @@ namespace LudemDare.Desktop
             return newDict;
         }
 
+        private GameObject MakeRandomEnemy(){
+            return localEnemyFactory.createEnemy(new Vector2(
+                random.Next(64, graphics.PreferredBackBufferWidth - 64),
+                random.Next(64, graphics.PreferredBackBufferWidth - 64)
+            ));
+        }
+
         protected override void Update(GameTime gameTime) {
 
             var kState = Keyboard.GetState();
@@ -110,6 +124,13 @@ namespace LudemDare.Desktop
 
             foreach (var key in toDelete)
                 GameObjects.Remove(key);
+
+            if (kState.IsKeyDown(Keys.E) && !EHeld) {
+                EHeld = true;
+                GameObjects[Guid.NewGuid().ToString()] = MakeRandomEnemy();
+            }
+            else if(kState.IsKeyUp(Keys.E))
+                EHeld = false;
 
             base.Update(gameTime);
         }

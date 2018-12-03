@@ -48,6 +48,7 @@
     <Compile Include="ProjectileFactory.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="PlayerFactory.cs" />
+    <Compile Include="EnemyFatory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
