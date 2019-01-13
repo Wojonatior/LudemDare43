@@ -6,7 +6,7 @@ using System;
 
 namespace LudemDare.Desktop
 {
-    public class Game1 : Game
+    public class BOIClone : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
@@ -17,11 +17,11 @@ namespace LudemDare.Desktop
             = new Dictionary<string, Texture2D>();
         private Dictionary<string, GameObject> GameObjects
             = new Dictionary<string, GameObject>();
-        System.Random random;
+        Random random;
         bool EHeld;
 
 
-        public Game1()
+        public BOIClone()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -29,8 +29,6 @@ namespace LudemDare.Desktop
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             //Initalizer.getStartingPlayer(seed);
 
             EHeld = false;
@@ -44,7 +42,6 @@ namespace LudemDare.Desktop
 
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             Textures["PLAYER"] = Content.Load<Texture2D>("btc_128");
@@ -101,18 +98,49 @@ namespace LudemDare.Desktop
         private GameObject MakeRandomEnemy(){
             return localEnemyFactory.createEnemy(new Vector2(
                 random.Next(64, graphics.PreferredBackBufferWidth - 64),
-                random.Next(64, graphics.PreferredBackBufferWidth - 64)
+                random.Next(64, graphics.PreferredBackBufferHeight - 64)
             ));
         }
 
-        private static bool CheckCollision(GameObject obj1, GameObject obj2){
+        public static BoundingBox getBBfromGameObject(GameObject gObject)
+        {
+            var min = new Vector3(gObject.position.X - gObject.texture.Width / 2, gObject.position.Y - gObject.texture.Height / 2, 0);
+            var max = new Vector3(gObject.position.X + gObject.texture.Width / 2, gObject.position.Y + gObject.texture.Height / 2, 0);
+            return new BoundingBox(min, max);
+        }
+
+        private static bool CheckCollision(GameObject obj1, GameObject obj2, GameTime gameTime) {
+            var posVector = new Vector3(obj1.position, 0);
+            var velVector = new Vector3(obj1.velocity, 0);
+            var adjustedVelVector = Vector3.Multiply(velVector, gameTime.ElapsedGameTime.Seconds);
+            //var combinedVelVector = MATH // TODO: Add both velocity vectors together here
+            var velocityRay = new Ray(posVector, adjustedVelVector);
+
+            var leftPaddleBB = getBBfromGameObject(obj2);
+
+            var collisionPoint = velocityRay.Intersects(leftPaddleBB);
+            //leftCollision = leftPaddleCollisionPoint;
+            return CheckCircleCollision(obj1, obj2);
+            //return collisionPoint != null || CheckCircleCollision(obj1, obj2);
+        }
+
+        private static bool CheckRectangleCollision(GameObject obj1, GameObject obj2){
             return obj1.position.X < obj2.position.X + obj2.texture.Width &&
                 obj1.position.X + obj1.texture.Width > obj2.position.X &&
                 obj1.position.Y < obj2.position.Y + obj2.texture.Height &&
                 obj1.position.Y + obj1.texture.Height > obj2.position.Y;
         }
 
-        private static Dictionary<String,GameObject> CheckCollisionForAllObjects(Dictionary<String,GameObject> gameObjects){
+        private static bool CheckCircleCollision(GameObject obj1, GameObject obj2)
+        {
+            var dist_x = obj1.position.X - obj2.position.X;
+            var dist_y = obj1.position.Y - obj2.position.Y;
+            var distance = Math.Sqrt(dist_x * dist_x + dist_y * dist_y);
+
+            return distance < obj1.texture.Width/2 + obj2.texture.Width/2;
+        }
+
+        private static Dictionary<String,GameObject> CheckCollisionForAllObjects(Dictionary<String,GameObject> gameObjects, GameTime gameTime){
 
             var updatedObjects = new Dictionary<String,GameObject>(gameObjects);
             foreach (var obj in gameObjects) {
@@ -120,7 +148,7 @@ namespace LudemDare.Desktop
                     if (obj.Key == otherObj.Key)
                         continue;
 
-                    var didCollide = CheckCollision(obj.Value, otherObj.Value);
+                    var didCollide = CheckCollision(obj.Value, otherObj.Value, gameTime);
                     updatedObjects[obj.Key] = didCollide ?
                         obj.Value.resolveCollision(obj.Value, otherObj.Value) :
                         obj.Value;
@@ -136,7 +164,7 @@ namespace LudemDare.Desktop
                 Exit();
 
             GameObjects = UpdateExistingObjects(GameObjects, kState, gameTime, graphics);
-            GameObjects = CheckCollisionForAllObjects(GameObjects);
+            GameObjects = CheckCollisionForAllObjects(GameObjects, gameTime);
             var newObjects = CreateNewObjects(GameObjects, kState, gameTime);
             var toDelete = new List<string>();
 
@@ -164,7 +192,6 @@ namespace LudemDare.Desktop
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
             spriteBatch.Begin();
             foreach (var gameObject in GameObjects) {
                 spriteBatch.Draw(
